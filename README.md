@@ -7,9 +7,9 @@ The LaTeX package [`trackchanges`](http://trackchanges.sourceforge.net/) is grea
 
 This script does three things:
 
-1. Replaces `\add{...}` with the interior text.
-2. Deletes `\delete{...}`.
-3. Replaces `\change{...}{...}` with the interior text of the second `{...}`.
+1. Replaces `\added{...}` with the interior text.
+2. Deletes `\removed{...}`.
+3. Replaces `\changed{...}{...}` with the interior text of the second `{...}`.
 
 **Warning:** This script will **not** check if the `trackchanges` commands are valid. I.e. if the curly brackets are unbalanced, this code will error.
 
