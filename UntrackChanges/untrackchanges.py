@@ -3,13 +3,14 @@ import re
 from os.path import splitext
 
 def add_command(text):
-    add_start_pos = [m.start() for m in re.finditer('\\\\add', text)]
+    add_start_pos = [m.start() for m in re.finditer('\\\\added', text)]
+    print(add_start_pos)
     add_end_pos = len(add_start_pos)*[None]
     add_strings = len(add_start_pos)*[None]
     n = len(text)
     
     for (i,v) in enumerate(add_start_pos):
-        add_end_pos[i], add_strings[i] = find_interior(i,v,5,text)
+        add_end_pos[i], add_strings[i] = find_interior(i,v,7,text)
     
     new_text = '%s' % text
     for i in reversed(range(len(add_start_pos))):
@@ -17,13 +18,13 @@ def add_command(text):
     return new_text
 
 def remove_command(text):
-    remove_start_pos = [m.start() for m in re.finditer('\\\\remove', text)]
+    remove_start_pos = [m.start() for m in re.finditer('\\\\removed', text)]
     remove_end_pos = len(remove_start_pos)*[None]
     remove_strings = len(remove_start_pos)*[None]
     n = len(text)
     
     for (i,v) in enumerate(remove_start_pos):
-        remove_end_pos[i], remove_strings[i] = find_interior(i,v,8,text)
+        remove_end_pos[i], remove_strings[i] = find_interior(i,v,9,text)
     
     new_text = '%s' % text
     for i in reversed(range(len(remove_start_pos))):
@@ -31,7 +32,7 @@ def remove_command(text):
     return new_text
 
 def change_command(text):
-    change1_start_pos = [m.start() for m in re.finditer('\\\\change', text)]
+    change1_start_pos = [m.start() for m in re.finditer('\\\\replaced', text)]
     change1_end_pos = len(change1_start_pos)*[None]
     change1_strings = len(change1_start_pos)*[None]
     change2_start_pos = len(change1_start_pos)*[None]
@@ -41,39 +42,58 @@ def change_command(text):
     
     for (i,v) in enumerate(change1_start_pos):
         # First text
-        change1_end_pos[i], change1_strings[i] = find_interior(i,v,8,text)
+        change1_end_pos[i], change1_strings[i] = find_interior(i,v,10,text)
         # Second text
         change2_start_pos[i] = change1_end_pos[i]
         change2_end_pos[i], change2_strings[i] = find_interior(i,change2_start_pos[i],1,text)
     
     new_text = '%s' % text
     for i in reversed(range(len(change1_start_pos))):
-        new_text = new_text[:change1_start_pos[i]] + change2_strings[i] + new_text[change2_end_pos[i]:]
+        new_text = new_text[:change1_start_pos[i]] + change1_strings[i] + new_text[change2_end_pos[i]:]
     return new_text
 
 def find_interior(i,v,start,text):
     bracket_start_pos = v + start
     bracket_level = 1
     ind = bracket_start_pos
+    comment = False
+    print(start, len(text), bracket_start_pos)
 
     interior_string = ''
     while bracket_level > 0:
-        if text[ind] == '{':
-            bracket_level += 1
-        elif text[ind] == '}':
-            bracket_level -= 1
-        interior_string += text[ind]
+        #print(ind)
+        #print(text[ind], text[ind-1])
+        if text[ind] =='%' and text[ind-1] !='!':
+            comment = True
+        if r'%s'%text[ind] == '\n':
+            comment = False
+
+        if comment ==False:
+            if text[ind] == '{':
+                bracket_level += 1
+            elif text[ind] == '}':
+                bracket_level -= 1
         ind += 1
+    interior_string = text[v + start:ind-1]
     
-    return ind, interior_string[:-1]
+    return ind, interior_string, bracket_level
 
 def bracket_balance(text):
     bracket_level = 0
-    for v in text:
-        if v == '{':
-            bracket_level += 1
-        elif v == '}':
-            bracket_level -= 1
+    comment = False
+    for i,char in enumerate([r'%s'%i for i in text ]):
+        
+        if char =='%' and text[i-1] !='!':
+            comment = True
+            print(True)
+        if r'%s'%char == '\n':
+            comment = False
+            print(False)
+        if comment ==False:
+            if char == '{':
+                bracket_level += 1
+            elif char == '}':
+                bracket_level -= 1
     return bracket_level
 
 def check_validity(text):
@@ -102,7 +122,7 @@ if __name__ == "__main__":
     
     filename_split = splitext(filename)
     new_filename = filename_split[0] + '-untrack' + filename_split[1]
- 
+
     with open(new_filename, 'w') as f:
         f.write(new_text)
     print('Success!')
