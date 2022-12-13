@@ -19,7 +19,7 @@ Currently, this is used as a script on a plain `.tex` file, e.g.
 
 `python untrackchanges.py file.tex`
 
-This will produce a new file with a `.untrack` extension. 
+This will produce a new file with a `-untrack.txt` extension. 
 
 ## Todo
 
